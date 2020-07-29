@@ -2,5 +2,8 @@ output
 .DS_Store
 
 # build artifacts
+.asciidoctor
 Gemfile.lock
 build/*
+book/contributors.txt
+diagrams/*.svg

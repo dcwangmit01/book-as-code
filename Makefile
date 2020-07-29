@@ -88,7 +88,8 @@ graphviz: $(GRAPHVIZ_SVG_FILES)
 .PHONY: plantuml
 plantuml: $(PLANTUML_SVG_FILES)
 %.plantuml.svg: %.plantuml
-	cat "$<" | plantuml -pipe -quiet -tsvg > "$@" 2>&1 | $(FILTER_ERRORS)
+	plantuml -tsvg "$<" 2>&1 | $(FILTER_ERRORS)
+	mv $(basename $<).svg $(basename $<).plantuml.svg
 
 .PHONY: clean
 clean:  ## Clean up all temporary files
