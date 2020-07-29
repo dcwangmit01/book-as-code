@@ -2,12 +2,5 @@ output
 .DS_Store
 
 # build artifacts
-# Gemfile.lock
-*.html
-*.pdf
-*.pdfmarks
-*.epub
-*.mobi
-*.docbook
-*.docx
-contributors.txt
+Gemfile.lock
+build/*
