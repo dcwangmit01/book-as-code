@@ -7,3 +7,4 @@ Gemfile.lock
 build/*
 book/contributors.txt
 diagrams/*.svg
+diagrams/*.png

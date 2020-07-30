@@ -7,8 +7,10 @@ BUILD_DIR := ./build
 
 GRAPHVIZ_DOT_FILES := $(shell find ./diagrams -type f -name '*.dot')
 GRAPHVIZ_SVG_FILES := $(GRAPHVIZ_DOT_FILES:dot=dot.svg)
+GRAPHVIZ_PNG_FILES := $(GRAPHVIZ_DOT_FILES:dot=dot.png)
 PLANTUML_FILES := $(shell find ./diagrams -type f -name '*.plantuml')
 PLANTUML_SVG_FILES := $(PLANTUML_FILES:plantuml=plantuml.svg)
+PLANTUML_PNG_FILES := $(PLANTUML_FILES:plantuml=plantuml.png)
 
 ASCIIDOC_PARAMS := -r asciidoctor-diagram --attribute revnumber='$(VERSION_STRING)' --attribute revdate='$(DATE_STRING)'
 
@@ -81,15 +83,20 @@ diagrams:  ## Compile graphviz and plantuml source files in ./diagrams into SVGs
 diagrams: graphviz plantuml
 
 .PHONY: graphviz
-graphviz: $(GRAPHVIZ_SVG_FILES)
+graphviz: $(GRAPHVIZ_SVG_FILES) $(GRAPHVIZ_PNG_FILES)
 %.dot.svg: %.dot
 	dot -Tsvg "$<" > "$@"
+%.dot.png: %.dot
+	dot -Tpng "$<" > "$@"
 
 .PHONY: plantuml
-plantuml: $(PLANTUML_SVG_FILES)
+plantuml: $(PLANTUML_SVG_FILES) $(PLANTUML_PNG_FILES)
 %.plantuml.svg: %.plantuml
 	plantuml -tsvg "$<" 2>&1 | $(FILTER_ERRORS)
 	mv $(basename $<).svg $(basename $<).plantuml.svg
+%.plantuml.png: %.plantuml
+	plantuml -tpng "$<" 2>&1 | $(FILTER_ERRORS)
+	mv $(basename $<).png $(basename $<).plantuml.png
 
 .PHONY: clean
 clean:  ## Clean up all temporary files
