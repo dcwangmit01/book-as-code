@@ -17,8 +17,6 @@ ASCIIDOC_PARAMS := -r asciidoctor-diagram --attribute revnumber='$(VERSION_STRIN
 EXTRA_ENV := JAVA_HOME=$(shell dirname $(shell dirname $(shell which java)))
 EXTRA_ENV += KINDLEGEN=$(shell which kindlegen)
 
-FILTER_ERRORS := grep -v -E "(font access|proper APIs|Set a breakpoint)" || true
-
 
 .PHONY: test
 test:
@@ -47,7 +45,7 @@ build-html: ## Build html doc only
 build-html: $(BUILD_DIR)/$(NAME).html
 $(BUILD_DIR)/$(NAME).html: $(GRAPHVIZ_SVG_FILES) $(PLANTUML_SVG_FILES) book/contributors.txt
 	@echo "==> Converting to HTML at $@"
-	$(EXTRA_ENV) bundle exec asciidoctor $(ASCIIDOC_PARAMS) -a data-uri --out-file $(BUILD_DIR)/$(NAME).html book.asc 2>&1 | $(FILTER_ERRORS)
+	$(EXTRA_ENV) bundle exec asciidoctor $(ASCIIDOC_PARAMS) -a data-uri --out-file $(BUILD_DIR)/$(NAME).html book.asc
 
 .PHONY: build-epub
 build-epub: ## Build epub doc only
@@ -69,7 +67,7 @@ build-word: $(BUILD_DIR)/$(NAME).docx
 $(BUILD_DIR)/$(NAME).docx: $(GRAPHVIZ_SVG_FILES) $(PLANTUML_SVG_FILES) book/contributors.txt
 	@echo "==> Converting to Word at $@"
 	$(EXTRA_ENV) bundle exec asciidoctor  $(ASCIIDOC_PARAMS) --backend docbook --out-file - book.asc \
-	  | pandoc --from docbook --to docx --output $(BUILD_DIR)/$(NAME).docx --highlight-style tango 2>&1 | $(FILTER_ERRORS)
+	  | pandoc --from docbook --to docx --output $(BUILD_DIR)/$(NAME).docx --highlight-style tango
 
 .PHONY: build-pdf
 build-pdf: ## Build pdf doc only
@@ -92,10 +90,10 @@ graphviz: $(GRAPHVIZ_SVG_FILES) $(GRAPHVIZ_PNG_FILES)
 .PHONY: plantuml
 plantuml: $(PLANTUML_SVG_FILES) $(PLANTUML_PNG_FILES)
 %.plantuml.svg: %.plantuml
-	plantuml -tsvg "$<" 2>&1 | $(FILTER_ERRORS)
+	plantuml -tsvg "$<"
 	mv $(basename $<).svg $(basename $<).plantuml.svg
 %.plantuml.png: %.plantuml
-	plantuml -tpng "$<" 2>&1 | $(FILTER_ERRORS)
+	plantuml -tpng "$<"
 	mv $(basename $<).png $(basename $<).plantuml.png
 
 .PHONY: clean
