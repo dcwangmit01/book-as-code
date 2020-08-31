@@ -23,8 +23,11 @@ PLANTUML_CMD := java -Djava.awt.headless=true -jar $(PLANTUML_JAR)
 ASCIIDOC_CMD := asciidoctor
 ASCIIDOC_FILES := $(shell find * -type f -name '*.asc')
 ASCIIDOC_PARAMS := -a data-uri -a allow-uri-read \
+    --safe-mode safe \
     -r $(ASCIIDOC_CMD)-diagram \
     --attribute revnumber='$(VERSION_STRING)' --attribute revdate='$(DATE_STRING)'
+
+MAIN_ADOC := main.asc
 
 # Filter PlantUML/OpenJdk font errors until this is fixed:
 #   https://github.com/plantuml/plantuml/issues/305
@@ -33,11 +36,10 @@ FILTER_ERRORS := 2>&1 | (grep -v CoreText || true)
 WINDOWS_COMPATIBILITY_ENV_VARS = MSYS_NO_PATHCONV=1
 DOCKER_RUN_COMMAND = \
   $(WINDOWS_COMPATIBILITY_ENV_VARS) \
-  docker run -it --rm -v $(shell pwd):/$(NAME) \
+  docker run -it --rm -v $(shell dirname $(shell pwd)):/documents \
     --entrypoint "/bin/bash" \
-    dcwangmit01/docker-asciidoctor-pandoc \
-    -c \
-      'cd /$(NAME) && VERSION_STRING=$(VERSION_STRING) make _$@'
+    dcwangmit01/docker-asciidoctor-pandoc:v0.2.0 \
+    -c 'cd $(NAME) && VERSION_STRING=$(VERSION_STRING) make _$@'
 ifeq ($(NO_DOCKER),true)
 	DOCKER_RUN_COMMAND = make _$@
 endif
@@ -49,6 +51,9 @@ all: check ## Makes all documentation formats
 	$(DOCKER_RUN_COMMAND)
 
 html: check ## Builds an HTML doc
+	$(DOCKER_RUN_COMMAND)
+
+xhtml: check ## Builds an XHTML doc
 	$(DOCKER_RUN_COMMAND)
 
 epub: check  ## Builds an EPUB doc
@@ -66,10 +71,13 @@ pdf: check  ## Builds a PDF
 #######################################
 # Local Private Build Targets
 
-_all: _html _epub _mobi _docx _pdf
+_all: _html _pdf _docx _xhtml _epub # _mobi
 
 .PHONY: _html
 _html: $(BUILD_DIR)/$(NAME).html
+
+.PHONY: _xhtml
+_xhtml: $(BUILD_DIR)/$(NAME).xhtml
 
 .PHONY: _epub
 _epub: $(BUILD_DIR)/$(NAME).epub
@@ -97,18 +105,28 @@ contributors:  ## Build contributes.txt file
 
 .PHONY: develop
 develop: ## Loop the html build and open a webpage with automatic reload
-develop: _html
+develop: html
 	if [ ! -f /.dockerenv ]; then \
 	  open $(BUILD_DIR)/$(NAME).html; \
 	fi
-	while true; do make _html ; sleep 5; done
+	while true; do make html ; sleep 5; done
 
 $(BUILD_DIR)/$(NAME).html: $(GRAPHVIZ_SVG_FILES) $(PLANTUML_SVG_FILES) $(ASCIIDOC_FILES)
 	@echo "==> Converting to HTML at $@"
 	$(ASCIIDOC_CMD) \
 	  $(ASCIIDOC_PARAMS) \
+	  --backend html5 \
 	  --out-file $(BUILD_DIR)/$(NAME).html \
-	  main.asc \
+	  $(MAIN_ADOC) \
+	  $(FILTER_ERRORS)
+
+$(BUILD_DIR)/$(NAME).xhtml: $(GRAPHVIZ_SVG_FILES) $(PLANTUML_SVG_FILES) $(ASCIIDOC_FILES)
+	@echo "==> Converting to XHTML at $@"
+	$(ASCIIDOC_CMD) \
+	  $(ASCIIDOC_PARAMS) \
+	  --backend xhtml \
+	  --out-file $(BUILD_DIR)/$(NAME).xhtml \
+	  $(MAIN_ADOC) \
 	  $(FILTER_ERRORS)
 
 $(BUILD_DIR)/$(NAME).epub: $(GRAPHVIZ_SVG_FILES) $(PLANTUML_SVG_FILES) $(ASCIIDOC_FILES)
@@ -116,7 +134,7 @@ $(BUILD_DIR)/$(NAME).epub: $(GRAPHVIZ_SVG_FILES) $(PLANTUML_SVG_FILES) $(ASCIIDO
 	$(ASCIIDOC_CMD)-epub3 \
 	  $(ASCIIDOC_PARAMS) \
 	  --out-file $(BUILD_DIR)/$(NAME).epub \
-	  main.asc \
+	  $(MAIN_ADOC) \
 	  $(FILTER_ERRORS)
 
 $(BUILD_DIR)/$(NAME)-kf8.epub: $(GRAPHVIZ_SVG_FILES) $(PLANTUML_SVG_FILES) $(ASCIIDOC_FILES)
@@ -126,7 +144,7 @@ $(BUILD_DIR)/$(NAME)-kf8.epub: $(GRAPHVIZ_SVG_FILES) $(PLANTUML_SVG_FILES) $(ASC
 	  $(ASCIIDOC_PARAMS) \
 	  -a ebook-format=kf8 \
 	  --out-file $(BUILD_DIR)/$(NAME).epub \
-	  main.asc \
+	  $(MAIN_ADOC) \
 	  $(FILTER_ERRORS)
 
 $(BUILD_DIR)/$(NAME).docx: $(GRAPHVIZ_SVG_FILES) $(PLANTUML_SVG_FILES) $(ASCIIDOC_FILES)
@@ -136,7 +154,7 @@ $(BUILD_DIR)/$(NAME).docx: $(GRAPHVIZ_SVG_FILES) $(PLANTUML_SVG_FILES) $(ASCIIDO
 	  $(ASCIIDOC_PARAMS) \
 	  --backend docbook \
 	  --out-file $(BUILD_DIR)/$(NAME).docbook \
-	  main.asc
+	  $(MAIN_ADOC)
 	 (cd $(BUILD_DIR) && pandoc --from docbook --to docx \
 	    --output $(NAME).docx \
 	    --highlight-style tango \
@@ -147,7 +165,7 @@ $(BUILD_DIR)/$(NAME).pdf: $(GRAPHVIZ_SVG_FILES) $(PLANTUML_SVG_FILES) $(ASCIIDOC
 	$(ASCIIDOC_CMD)-pdf \
 	  $(ASCIIDOC_PARAMS) -a allow-uri-read \
 	  --out-file $(BUILD_DIR)/$(NAME).pdf \
-	  main.asc \
+	  $(MAIN_ADOC) \
 	  $(FILTER_ERRORS)
 
 .PHONY: diagrams
