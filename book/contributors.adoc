@@ -5,6 +5,6 @@ Thank you for helping make this a better book for everyone.
 
 [source,tabsize=8]
 ----
-include::contributors.txt[]
+include::../contributors.txt[]
 ----
 

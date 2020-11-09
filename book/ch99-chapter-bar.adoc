@@ -1,3 +1,12 @@
+[[ch99-chapter-bar]]
+== Bar Chapter
+
+This chapter will be about the first topic...
+
+We will begin by...
+
+At the end of this chapter you should understand why...
+
 === Bar First
 
 A Paragraph
@@ -29,3 +38,15 @@ A Paragraph
 Microsoft Word will not render SVGs
 
 image::./diagrams/example-standalone-plantuml.plantuml.svg[An example]
+
+=== Bar Second
+
+A Paragraph
+
+=== Summary
+
+You should have a basic understanding of...
+
+You should also now have a working version of...
+
+It's now time to...

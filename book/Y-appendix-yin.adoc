@@ -1,0 +1,15 @@
+[[y-appendix-yin]]
+[appendix]
+== Topic Yin
+
+=== Yin First
+
+A Paragraph
+
+==== Imported PNG Image
+
+image::./book/cover.png[An example book cover]
+
+=== Yin Second
+
+A Paragraph

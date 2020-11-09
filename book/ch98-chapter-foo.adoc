@@ -1,3 +1,12 @@
+[[ch98-chapter-foo]]
+== Foo Chapter
+
+This chapter will be about the first topic...
+
+We will begin by...
+
+At the end of this chapter you should understand why...
+
 === Foo First
 
 A Paragraph
@@ -41,3 +50,54 @@ BlockProcessor <|-- DiagramBlock
 DiagramBlock <|-- DitaaBlock
 DiagramBlock <|-- PlantUmlBlock
 ----
+
+=== Foo Second
+
+A Paragraph
+
+==== Inline Graphviz
+
+A Paragraph
+
+[graphviz, ./diagrams/example-inline-graphviz]
+----
+digraph g {
+    a -> b
+    b -> c
+    c -> d
+    d -> a
+}
+----
+
+==== Inline Shell
+
+[source,console]
+----
+$ git commit
+$ git rebase -i HEAD~8
+$ git rebase master
+$ git push origin master
+$ git tag v0.1.0
+----
+
+==== Inline Python
+
+[source,python]
+----
+import ipdb <1>
+for c in "asdf": <2>
+    print(c) <3>
+ipdb.set_trace()
+----
+
+<1> Import debug library
+<2> For each character in string
+<3> Print the character
+
+=== Summary
+
+You should have a basic understanding of...
+
+You should also now have a working version of...
+
+It's now time to...
